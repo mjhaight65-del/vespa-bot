@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AI Consulting Lab</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="nav">
+    <div class="container nav-inner">
+      <div class="brand"><span class="logo-dot"></span><span>AI Consulting Lab</span></div>
+      <div class="links">
+        <a href="/admin.html">Admin</a>
+        <a class="btn small" href="#demo">Live Demo</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container hero">
+    <p class="kicker">Branded AI Chatbots • Lead Capture • 24/7</p>
+    <h1>Make your website look premium — and capture leads while you sleep.</h1>
+    <p class="sub">
+      This chatbot answers FAQs, qualifies customers, and stores leads automatically.
+      It's built to be embedded on real businesses.
+    </p>
+    <div class="cta-row">
+      <a class="btn" href="#demo">Try the Demo</a>
+      <a class="btn ghost" href="/admin.html">View Leads</a>
+    </div>
+
+    <section id="demo" class="demo">
+      <div class="card">
+        <h3>Try the live widget</h3>
+        <p class="muted">Bottom-right corner. Type "quote" to test lead capture.</p>
+      </div>
+    </section>
+  </main>
+
+  <script
+    src="./widget.js"
+    data-api="http://localhost:8001"
+    data-brand="AI Consulting Lab"
+    data-accent="#7c3aed"
+    data-position="right"
+  ></script>
+</body>
+</html>

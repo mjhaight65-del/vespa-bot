@@ -1,0 +1,10 @@
+{
+  "business_name": "AI Consulting Lab",
+  "greeting": "Hey — I'm the AI assistant. Want a quote or just have a question?",
+  "faq": [
+    {"q": "What do you do?", "a": "We install branded AI chatbots that capture leads 24/7 and answer FAQs instantly."},
+    {"q": "How fast can you install?", "a": "Usually within 24–48 hours depending on your site and content."},
+    {"q": "What do you need from me?", "a": "Your logo/colors, top FAQs, services, hours, and any pricing rules."}
+  ],
+  "lead_offer": "If you want, leave your name + email/phone and I'll follow up."
+}
