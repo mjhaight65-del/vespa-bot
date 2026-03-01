@@ -278,3 +278,35 @@ def home():
 
 # MUST BE LAST: serve /widget.js, /styles.css, /admin.html, etc from /public
 app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="public")
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
+@app.post("/chat")
+async def chat_alias(request: Request):
+    """
+    Accepts either:
+      { "message": "hi" }
+    or
+      { "session_id": "...", "message": "hi" }
+    and returns:
+      { "reply": "...", "session_id": "..." }
+    """
+    payload = await request.json()
+    message = payload.get("message", "") or ""
+    session_id = payload.get("session_id")
+
+    # ✅ If you already have a different chat handler, call it here.
+    # Common patterns below — pick the one that matches your file.
+
+    # OPTION A: If you already have a function like `handle_chat(session_id, message)`
+    if "handle_chat" in globals():
+        data = await globals()["handle_chat"](session_id, message)
+        return JSONResponse(data)
+
+    # OPTION B: If you already have a route function named something else, like `chat_endpoint`
+    if "chat_endpoint" in globals():
+        data = await globals()["chat_endpoint"]({"session_id": session_id, "message": message})
+        return JSONResponse(data)
+
+    # Fallback (so it never crashes silently)
+    return JSONResponse({"reply": "Chat endpoint is connected, but backend logic isn't wired yet.", "session_id": session_id})
