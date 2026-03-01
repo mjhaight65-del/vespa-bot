@@ -1,9 +1,13 @@
 (() => {
   const script = document.currentScript;
-  const API = script.getAttribute("data-api") || "http://localhost:8001";
-  const BRAND = script.getAttribute("data-brand") || "Support";
-  const ACCENT = script.getAttribute("data-accent") || "#7c3aed";
-  const POSITION = script.getAttribute("data-position") || "right";
+
+  // ✅ API base: use data-api if provided, otherwise same origin (works on Render + Vespa site)
+  const API_RAW = (script?.getAttribute("data-api") || "").trim();
+  const API = (API_RAW || window.location.origin).replace(/\/+$/, ""); // remove trailing slash
+
+  const BRAND = script?.getAttribute("data-brand") || "Support";
+  const ACCENT = script?.getAttribute("data-accent") || "#7c3aed";
+  const POSITION = script?.getAttribute("data-position") || "right";
 
   const posStyle = POSITION === "left" ? "left:18px" : "right:18px";
   const css = `
@@ -45,12 +49,16 @@
 
   const btn = document.createElement("button");
   btn.className = "w-btn";
-  btn.innerHTML = "<svg width=\"26\" height=\"26\" viewBox=\"0 0 24 24\" fill=\"none\"><path d=\"M4 5.5C4 4.12 5.12 3 6.5 3h11C19.88 3 21 4.12 21 5.5v8C21 14.88 19.88 16 18.5 16H10l-4.2 3.2c-.66.5-1.8.02-1.8-.86V5.5Z\" stroke=\"white\" stroke-width=\"1.8\" stroke-linejoin=\"round\"/></svg>";
+  btn.innerHTML =
+    '<svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M4 5.5C4 4.12 5.12 3 6.5 3h11C19.88 3 21 4.12 21 5.5v8C21 14.88 19.88 16 18.5 16H10l-4.2 3.2c-.66.5-1.8.02-1.8-.86V5.5Z" stroke="white" stroke-width="1.8" stroke-linejoin="round"/></svg>';
   document.body.appendChild(btn);
 
   const panel = document.createElement("div");
   panel.className = "w-panel";
-  panel.innerHTML = "<div class=\"w-top\"><div class=\"w-brand\"><span class=\"w-dot\"></span>" + BRAND + "</div><button class=\"w-x\" aria-label=\"Close\">✕</button></div><div class=\"w-body\" id=\"wBody\"></div><div class=\"w-hint\">Tip: type \"quote\" to test lead capture.</div><div class=\"w-foot\"><input class=\"w-in\" id=\"wInput\" placeholder=\"Type your message…\" /><button class=\"w-send\" id=\"wSend\">Send</button></div>";
+  panel.innerHTML =
+    '<div class="w-top"><div class="w-brand"><span class="w-dot"></span>' +
+    BRAND +
+    '</div><button class="w-x" aria-label="Close">✕</button></div><div class="w-body" id="wBody"></div><div class="w-hint">Tip: type "quote" to test lead capture.</div><div class="w-foot"><input class="w-in" id="wInput" placeholder="Type your message…" /><button class="w-send" id="wSend">Send</button></div>';
   document.body.appendChild(panel);
 
   const body = panel.querySelector("#wBody");
@@ -71,10 +79,10 @@
   }
 
   async function callChat(message) {
-    const res = await fetch(API + "/chat", {
+    const res = await fetch(`${API}/chat`, {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ session_id: sessionId, message: message })
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: sessionId, message }),
     });
     if (!res.ok) throw new Error("Chat failed: " + res.status);
     return res.json();
@@ -82,11 +90,11 @@
 
   function toggle(open) {
     panel.classList.toggle("open", open);
-    if (open) setTimeout(function() { input.focus(); }, 50);
+    if (open) setTimeout(() => input.focus(), 50);
   }
 
-  btn.addEventListener("click", function() { toggle(!panel.classList.contains("open")); });
-  panel.querySelector(".w-x").addEventListener("click", function() { toggle(false); });
+  btn.addEventListener("click", () => toggle(!panel.classList.contains("open")));
+  panel.querySelector(".w-x").addEventListener("click", () => toggle(false));
 
   async function onSend() {
     const msg = (input.value || "").trim();
@@ -107,12 +115,15 @@
       thinking.textContent = data.reply || "Got it.";
     } catch (e) {
       thinking.textContent = "Something went wrong. Refresh and try again.";
-      console.error(e);
+      console.error("Widget chat error:", e);
+      console.error("API base:", API);
     }
   }
 
   send.addEventListener("click", onSend);
-  input.addEventListener("keydown", function(e) { if (e.key === "Enter") onSend(); });
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") onSend();
+  });
 
-  addMsg("Hey — I'm the " + BRAND + " assistant. Want a quote or just have a question?");
+  addMsg(`Hey — I'm the ${BRAND} assistant. Want a quote or just have a question?`);
 })();
