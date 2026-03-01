@@ -265,3 +265,16 @@ def set_lead_status(payload: LeadStatusIn):
 
 # --------- Static site ----------
 app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="public")
+from pathlib import Path
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+
+BASE_DIR = Path(__file__).resolve().parent
+PUBLIC_DIR = BASE_DIR / "public"
+
+@app.get("/")
+def home():
+    return FileResponse(PUBLIC_DIR / "index.html")
+
+# MUST BE LAST: serve /widget.js, /styles.css, /admin.html, etc from /public
+app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="public")
