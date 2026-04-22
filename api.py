@@ -19,6 +19,7 @@ PUBLIC_DIR = BASE_DIR / "public"
 LEADS_FILE = DATA_DIR / "leads.json"
 CHATS_FILE = DATA_DIR / "chat_sessions.json"
 KB_FILE = DATA_DIR / "knowledge_base.json"
+LEADERBOARD_FILE = DATA_DIR / "leaderboard.json"
 
 DATA_DIR.mkdir(exist_ok=True)
 PUBLIC_DIR.mkdir(exist_ok=True)
@@ -261,6 +262,44 @@ def set_lead_status(payload: LeadStatusIn):
             _write_json(LEADS_FILE, leads)
             return {"ok": True}
     raise HTTPException(status_code=404, detail="lead not found")
+
+
+# --------- Flappy PD leaderboard ----------
+class ScoreIn(BaseModel):
+    username: str
+    score: int
+
+
+@app.post("/leaderboard")
+def submit_score(payload: ScoreIn):
+    name = (payload.username or "").strip()[:16]
+    if not name:
+        raise HTTPException(status_code=400, detail="username required")
+    score = int(payload.score)
+    if score < 0 or score > 100000:
+        raise HTTPException(status_code=400, detail="invalid score")
+
+    board = _read_json(LEADERBOARD_FILE, [])
+    existing = next((e for e in board if e.get("username") == name), None)
+    if existing:
+        if score > int(existing.get("score", 0)):
+            existing["score"] = score
+            existing["timestamp"] = now_iso()
+    else:
+        board.append({"username": name, "score": score, "timestamp": now_iso()})
+
+    board.sort(key=lambda e: int(e.get("score", 0)), reverse=True)
+    board = board[:100]
+    _write_json(LEADERBOARD_FILE, board)
+    return {"ok": True}
+
+
+@app.get("/leaderboard")
+def get_leaderboard(limit: int = 10):
+    limit = max(1, min(100, limit))
+    board = _read_json(LEADERBOARD_FILE, [])
+    board.sort(key=lambda e: int(e.get("score", 0)), reverse=True)
+    return board[:limit]
 
 
 # --------- Static site ----------
