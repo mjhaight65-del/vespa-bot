@@ -164,13 +164,20 @@
     score: 0,
     best: Number(localStorage.getItem('flappyPdBest') || 0),
     frame: 0,
-    spawnEvery: 95,
-    gap: 175,
+    framesSinceSpawn: 0,
     pipeW: 78,
-    gravity: 0.42,
-    flap: -7.2,
-    speed: 2.4
+    gravity: 0.32,
+    flap: -6.3
   };
+
+  function difficulty() {
+    const t = Math.min(1, state.score / 25);
+    const speed = 1.5 + 1.8 * t;
+    const gap = 235 - 85 * t;
+    const pipeDistance = 290 - 40 * t;
+    const spawnEvery = Math.max(40, Math.round(pipeDistance / speed));
+    return { speed, gap, spawnEvery };
+  }
 
   function resetGame() {
     state.bird.x = 110;
@@ -181,6 +188,7 @@
     state.ground = 0;
     state.score = 0;
     state.frame = 0;
+    state.framesSinceSpawn = 0;
   }
 
   function startGame() {
@@ -215,14 +223,15 @@
     }
   }
 
-  function spawnPipe() {
+  function spawnPipe(gap) {
     const minTop = 60;
-    const maxTop = H - state.gap - 140;
+    const maxTop = H - gap - 140;
     const topH = Math.floor(minTop + Math.random() * (maxTop - minTop));
     const term = BET_TERMS[Math.floor(Math.random() * BET_TERMS.length)];
     state.pipes.push({
       x: W + 10,
       topH: topH,
+      gap: gap,
       passed: false,
       term: term
     });
@@ -242,24 +251,29 @@
   }
 
   function update() {
+    const d = difficulty();
     if (state.mode !== 'play') {
-      state.ground = (state.ground + state.speed) % 48;
+      state.ground = (state.ground + d.speed) % 48;
       return;
     }
 
     state.frame++;
     state.bird.vy += state.gravity;
-    if (state.bird.vy > 10) state.bird.vy = 10;
+    if (state.bird.vy > 9) state.bird.vy = 9;
     state.bird.y += state.bird.vy;
     state.bird.rot = Math.max(-0.5, Math.min(1.2, state.bird.vy / 12));
 
-    if (state.frame % state.spawnEvery === 0) spawnPipe();
+    state.framesSinceSpawn++;
+    if (state.framesSinceSpawn >= d.spawnEvery) {
+      state.framesSinceSpawn = 0;
+      spawnPipe(d.gap);
+    }
 
     const groundY = H - 90;
 
     for (let i = state.pipes.length - 1; i >= 0; i--) {
       const p = state.pipes[i];
-      p.x -= state.speed;
+      p.x -= d.speed;
 
       const bx = state.bird.x;
       const by = state.bird.y;
@@ -268,9 +282,9 @@
       const topRect = { x: p.x, y: 0, w: state.pipeW, h: p.topH };
       const botRect = {
         x: p.x,
-        y: p.topH + state.gap,
+        y: p.topH + p.gap,
         w: state.pipeW,
-        h: H - (p.topH + state.gap)
+        h: H - (p.topH + p.gap)
       };
 
       if (
@@ -284,7 +298,6 @@
         p.passed = true;
         state.score++;
         hud.textContent = String(state.score);
-        if (state.score % 5 === 0 && state.speed < 4.2) state.speed += 0.2;
       }
 
       if (p.x + state.pipeW < -20) state.pipes.splice(i, 1);
@@ -299,7 +312,7 @@
       state.bird.vy = 0;
     }
 
-    state.ground = (state.ground + state.speed) % 48;
+    state.ground = (state.ground + d.speed) % 48;
   }
 
   function drawBackground() {
@@ -373,7 +386,7 @@
     drawBody(0, p.topH - capH);
     drawCap(p.topH - capH);
 
-    const botY = p.topH + state.gap;
+    const botY = p.topH + p.gap;
     drawCap(botY);
     drawBody(botY + capH, H - (botY + capH) - 90);
 
