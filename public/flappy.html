@@ -118,6 +118,81 @@
       border: 3px solid #3d2a08;
       box-shadow: 0 6px 0 #000, 0 0 18px rgba(230, 194, 77, 0.6);
     }
+    #overlay { overflow-y: auto; }
+    #userBlock {
+      margin-top: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #userBlock label {
+      font-size: 11px;
+      opacity: 0.75;
+      letter-spacing: 3px;
+      margin-bottom: 6px;
+      color: #ffd84d;
+    }
+    #usernameInput {
+      width: 240px;
+      max-width: 80vw;
+      padding: 10px 14px;
+      font-size: 18px;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: 1px;
+      background: rgba(10, 7, 24, 0.6);
+      color: #ffd84d;
+      border: 2px solid #d9a72a;
+      border-radius: 8px;
+      outline: none;
+      font-family: inherit;
+    }
+    #usernameInput::placeholder { color: rgba(255, 216, 77, 0.45); }
+    #usernameInput:focus { box-shadow: 0 0 0 3px rgba(217, 167, 42, 0.35); }
+    #usernameInput.shake { animation: shake 0.35s; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+    #leaderboard {
+      margin-top: 18px;
+      width: 300px;
+      max-width: 92vw;
+      background: rgba(10, 7, 24, 0.78);
+      border: 2px solid #d9a72a;
+      border-radius: 10px;
+      padding: 10px 14px 12px;
+    }
+    #leaderboard h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      letter-spacing: 3px;
+      color: #ffd84d;
+      text-align: center;
+      font-weight: 900;
+    }
+    #leaderList {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    #leaderList li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 2px;
+      border-bottom: 1px solid rgba(217, 167, 42, 0.18);
+      font-size: 14px;
+    }
+    #leaderList li:last-child { border-bottom: none; }
+    #leaderList .rank { width: 30px; color: #ffd84d; font-weight: 800; text-align: center; }
+    #leaderList .name { flex: 1; margin: 0 6px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #leaderList .score { color: #ffd84d; font-weight: 800; min-width: 36px; text-align: right; }
+    #leaderList li.me { background: rgba(255, 216, 77, 0.12); border-radius: 4px; }
+    #leaderList li.empty { justify-content: center; color: rgba(255,255,255,0.55); font-style: italic; }
   </style>
 </head>
 <body>
@@ -131,7 +206,15 @@
     <h1>FLAPPY PD</h1>
     <p>Dodge the parlay legs. Cash the ticket.</p>
     <div class="scoreline" id="overScore"></div>
+    <div id="userBlock">
+      <label for="usernameInput">PLAYER NAME</label>
+      <input type="text" id="usernameInput" maxlength="16" placeholder="Enter name" autocomplete="off" spellcheck="false" />
+    </div>
     <button class="play" id="playBtn">TAP TO PLAY</button>
+    <div id="leaderboard">
+      <h3>TOP BETTORS</h3>
+      <ol id="leaderList"><li class="empty">Loading...</li></ol>
+    </div>
     <div class="hint">Space / Click / Tap to flap</div>
   </div>
 
@@ -143,6 +226,63 @@
   const overlay = document.getElementById('overlay');
   const overScore = document.getElementById('overScore');
   const playBtn = document.getElementById('playBtn');
+  const usernameInput = document.getElementById('usernameInput');
+  const leaderList = document.getElementById('leaderList');
+
+  const LS_NAME = 'flappyPdName';
+  const savedName = localStorage.getItem(LS_NAME);
+  if (savedName) usernameInput.value = savedName;
+
+  function getUsername() {
+    return (usernameInput.value || '').trim().slice(0, 16);
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  async function fetchLeaderboard() {
+    try {
+      const r = await fetch('/leaderboard?limit=10', { cache: 'no-store' });
+      if (!r.ok) return null;
+      return await r.json();
+    } catch (e) { return null; }
+  }
+
+  async function submitScore(username, score) {
+    if (!username || score <= 0) return;
+    try {
+      await fetch('/leaderboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username, score: score })
+      });
+    } catch (e) { /* offline */ }
+  }
+
+  function renderLeaderboard(entries, highlight) {
+    if (entries === null) {
+      leaderList.innerHTML = '<li class="empty">Leaderboard offline</li>';
+      return;
+    }
+    if (!entries.length) {
+      leaderList.innerHTML = '<li class="empty">No scores yet — be the first!</li>';
+      return;
+    }
+    leaderList.innerHTML = entries.map(function (e, i) {
+      const me = (highlight && e.username === highlight) ? ' class="me"' : '';
+      return '<li' + me + '>' +
+        '<span class="rank">' + (i + 1) + '</span>' +
+        '<span class="name">' + escapeHtml(e.username) + '</span>' +
+        '<span class="score">' + e.score + '</span></li>';
+    }).join('');
+  }
+
+  async function refreshLeaderboard(highlight) {
+    renderLeaderboard(await fetchLeaderboard(), highlight);
+  }
 
   const W = canvas.width;
   const H = canvas.height;
@@ -172,9 +312,9 @@
 
   function difficulty() {
     const t = Math.min(1, state.score / 25);
-    const speed = 1.5 + 1.8 * t;
+    const speed = 1.8 + 2.0 * t;
     const gap = 235 - 85 * t;
-    const pipeDistance = 290 - 40 * t;
+    const pipeDistance = 300 - 40 * t;
     const spawnEvery = Math.max(40, Math.round(pipeDistance / speed));
     return { speed, gap, spawnEvery };
   }
@@ -192,14 +332,25 @@
   }
 
   function startGame() {
+    const name = getUsername();
+    if (!name) {
+      usernameInput.focus();
+      usernameInput.classList.remove('shake');
+      void usernameInput.offsetWidth;
+      usernameInput.classList.add('shake');
+      return false;
+    }
+    localStorage.setItem(LS_NAME, name);
     resetGame();
     state.mode = 'play';
     overlay.classList.add('hidden');
     hud.textContent = '0';
+    return true;
   }
 
-  function gameOver() {
+  async function gameOver() {
     state.mode = 'over';
+    const name = getUsername() || localStorage.getItem(LS_NAME);
     if (state.score > state.best) {
       state.best = state.score;
       localStorage.setItem('flappyPdBest', String(state.best));
@@ -210,11 +361,16 @@
       '<span class="best">Best: ' + state.best + '</span>';
     playBtn.textContent = 'PLAY AGAIN';
     hud.textContent = '';
+
+    if (name && state.score > 0) {
+      await submitScore(name, state.score);
+    }
+    await refreshLeaderboard(name);
   }
 
   function flap() {
     if (state.mode === 'menu' || state.mode === 'over') {
-      startGame();
+      if (!startGame()) return;
       state.bird.vy = state.flap;
       return;
     }
@@ -594,6 +750,8 @@
   }
 
   window.addEventListener('keydown', (e) => {
+    const t = document.activeElement;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
     if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
       onInput(e);
     }
@@ -602,9 +760,17 @@
   canvas.addEventListener('touchstart', onInput, { passive: false });
   playBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    startGame();
+    if (!startGame()) return;
     state.bird.vy = state.flap;
   });
+  usernameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      playBtn.click();
+    }
+  });
+
+  refreshLeaderboard(savedName);
 
   function fitCanvas() {
     const ratio = W / H;
