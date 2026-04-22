@@ -233,13 +233,29 @@
   const savedName = localStorage.getItem(LS_NAME);
   if (savedName) usernameInput.value = savedName;
 
-  // Leaderboard backend. Precedence:
-  //   ?api=https://... URL param  >  window.FLAPPY_PD_API  >  DEFAULT_API  >  same-origin
-  // Set DEFAULT_API below to your hosted backend (e.g. a Render deploy).
+  // ------------------------------------------------------------------
+  // LEADERBOARD BACKEND — pick ONE of these two options.
+  //
+  // Option A (easiest — ~60 seconds, no code host required):
+  //   1. Sign up at https://jsonbin.io (free).
+  //   2. Create a PUBLIC bin with initial content:  []
+  //   3. In "Access Keys", create a key with Read + Update allowed on that bin.
+  //   4. Paste the bin ID and key below.
+  //
+  // Option B (host the FastAPI yourself at a public URL, e.g. Render):
+  //   Leave JSONBIN_ID/KEY empty and either:
+  //     - Set DEFAULT_API to your hosted URL (e.g. https://flappy-pd.onrender.com), or
+  //     - Open the game with ?api=https://your-url for quick testing.
+  // ------------------------------------------------------------------
+  const JSONBIN_ID  = '';
+  const JSONBIN_KEY = '';
   const DEFAULT_API = 'https://flappy-pd.onrender.com';
+
   const apiParam = new URLSearchParams(location.search).get('api');
   const API_BASE = (apiParam || window.FLAPPY_PD_API || DEFAULT_API || '').replace(/\/$/, '');
   const apiUrl = (p) => API_BASE + p;
+  const USE_JSONBIN = !!(JSONBIN_ID && JSONBIN_KEY);
+  const JSONBIN_URL = 'https://api.jsonbin.io/v3/b/' + JSONBIN_ID;
 
   function getUsername() {
     return (usernameInput.value || '').trim().slice(0, 16);
@@ -251,8 +267,35 @@
     });
   }
 
+  async function jsonbinGet() {
+    const r = await fetch(JSONBIN_URL + '/latest', {
+      cache: 'no-store',
+      headers: { 'X-Access-Key': JSONBIN_KEY, 'X-Bin-Meta': 'false' }
+    });
+    if (!r.ok) throw new Error('jsonbin get ' + r.status);
+    const data = await r.json();
+    return Array.isArray(data) ? data : [];
+  }
+
+  async function jsonbinPut(board) {
+    const r = await fetch(JSONBIN_URL, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Access-Key': JSONBIN_KEY
+      },
+      body: JSON.stringify(board)
+    });
+    if (!r.ok) throw new Error('jsonbin put ' + r.status);
+  }
+
   async function fetchLeaderboard() {
     try {
+      if (USE_JSONBIN) {
+        const board = await jsonbinGet();
+        board.sort((a, b) => (b.score | 0) - (a.score | 0));
+        return board.slice(0, 10);
+      }
       const r = await fetch(apiUrl('/leaderboard?limit=10'), { cache: 'no-store' });
       if (!r.ok) return null;
       return await r.json();
@@ -262,6 +305,23 @@
   async function submitScore(username, score) {
     if (!username || score <= 0) return false;
     try {
+      if (USE_JSONBIN) {
+        let board = [];
+        try { board = await jsonbinGet(); } catch (_) { board = []; }
+        const now = new Date().toISOString();
+        const existing = board.find(e => e && e.username === username);
+        if (existing) {
+          if (score > (existing.score | 0)) {
+            existing.score = score;
+            existing.timestamp = now;
+          }
+        } else {
+          board.push({ username, score, timestamp: now });
+        }
+        board.sort((a, b) => (b.score | 0) - (a.score | 0));
+        await jsonbinPut(board.slice(0, 100));
+        return true;
+      }
       const r = await fetch(apiUrl('/leaderboard'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -273,11 +333,12 @@
 
   function renderLeaderboard(entries, highlight) {
     if (entries === null) {
+      const detail = USE_JSONBIN
+        ? 'JSONBin bin ' + escapeHtml(JSONBIN_ID) + ' unreachable'
+        : (API_BASE ? 'Backend at ' + escapeHtml(API_BASE) + ' unreachable' : 'No backend configured — see flappy.html');
       leaderList.innerHTML =
         '<li class="empty">Leaderboard offline<br>' +
-        '<span style="font-size:11px;opacity:0.7">' +
-        (API_BASE ? 'Backend at ' + escapeHtml(API_BASE) + ' unreachable' : 'No API configured') +
-        '</span></li>';
+        '<span style="font-size:11px;opacity:0.7">' + detail + '</span></li>';
       return;
     }
     if (!entries.length) {
@@ -325,9 +386,9 @@
 
   function difficulty() {
     const t = Math.min(1, state.score / 25);
-    const speed = 1.8 + 2.0 * t;
+    const speed = 2.3 + 1.9 * t;
     const gap = 235 - 85 * t;
-    const pipeDistance = 300 - 40 * t;
+    const pipeDistance = 320 - 40 * t;
     const spawnEvery = Math.max(40, Math.round(pipeDistance / speed));
     return { speed, gap, spawnEvery };
   }
