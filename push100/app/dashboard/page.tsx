@@ -14,6 +14,7 @@ import StatCard from "@/components/StatCard";
 import RepControls from "@/components/RepControls";
 import BadgeChips from "@/components/BadgeChips";
 import AIScannerCard from "@/components/AIScannerCard";
+import LockScreenWidgetPreview from "@/components/LockScreenWidgetPreview";
 
 export default function DashboardPage() {
   const { data, hydrated, addReps, resetToday } = useAppData();
@@ -79,6 +80,32 @@ export default function DashboardPage() {
           value={hydrated ? best.reps : 0}
           hint={best.date ? `on ${best.date}` : "no record yet"}
         />
+      </section>
+
+      <section className="mt-6 card p-5">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h2 className="font-bold">Lock Screen Widget</h2>
+            <p className="text-xs text-muted mt-0.5">
+              A live preview of how it'll look on your phone.
+            </p>
+          </div>
+          <span className="chip bg-accent/15 text-accent border border-accent/30">
+            Preview
+          </span>
+        </div>
+        <div className="mt-4">
+          <LockScreenWidgetPreview
+            todayTotal={hydrated ? reps : 0}
+            dailyGoal={data.goal}
+            streak={hydrated ? streak : 0}
+            widgetSettings={data.widget}
+          />
+        </div>
+        <p className="mt-4 text-[11px] text-muted text-center">
+          Real lock screen widgets coming in a future update. Tweak what shows
+          in <span className="text-white/80">Settings → Phone Widget</span>.
+        </p>
       </section>
 
       <section className="mt-6">

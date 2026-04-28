@@ -9,11 +9,19 @@ export type Reminders = {
   night: boolean;
 };
 
+export type WidgetSettings = {
+  showTodayReps: boolean;
+  showGoalProgress: boolean;
+  showStreak: boolean;
+  showReminders: boolean;
+};
+
 export type AppData = {
   goal: number;
   // Map of YYYY-MM-DD -> reps for that day
   history: Record<string, number>;
   reminders: Reminders;
+  widget: WidgetSettings;
 };
 
 const KEY = "push100:data:v1";
@@ -22,6 +30,12 @@ const defaultData: AppData = {
   goal: 100,
   history: {},
   reminders: { morning: true, lunch: false, night: true },
+  widget: {
+    showTodayReps: true,
+    showGoalProgress: true,
+    showStreak: true,
+    showReminders: true,
+  },
 };
 
 function readRaw(): AppData {
@@ -37,6 +51,7 @@ function readRaw(): AppData {
           ? parsed.history
           : {},
       reminders: { ...defaultData.reminders, ...(parsed.reminders ?? {}) },
+      widget: { ...defaultData.widget, ...(parsed.widget ?? {}) },
     };
   } catch {
     return defaultData;
@@ -113,6 +128,13 @@ export function useAppData() {
     [update],
   );
 
+  const setWidgetSetting = useCallback(
+    (which: keyof WidgetSettings, value: boolean) => {
+      update((d) => ({ ...d, widget: { ...d.widget, [which]: value } }));
+    },
+    [update],
+  );
+
   return {
     data,
     hydrated,
@@ -121,6 +143,7 @@ export function useAppData() {
     resetToday,
     setGoal,
     setReminder,
+    setWidgetSetting,
   };
 }
 

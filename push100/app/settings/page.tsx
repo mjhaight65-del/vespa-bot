@@ -7,7 +7,8 @@ import { useAppData } from "@/lib/storage";
 const PRESETS = [50, 100, 150, 200, 300];
 
 export default function SettingsPage() {
-  const { data, hydrated, setGoal, setReminder } = useAppData();
+  const { data, hydrated, setGoal, setReminder, setWidgetSetting } =
+    useAppData();
   const [draft, setDraft] = useState<string>("100");
 
   useEffect(() => {
@@ -93,6 +94,50 @@ export default function SettingsPage() {
             onChange={(v) => setReminder("night", v)}
           />
         </div>
+      </section>
+
+      <section className="card p-5">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="font-bold">Phone Widget</h2>
+          <span className="chip bg-accent/15 text-accent border border-accent/30">
+            Coming soon
+          </span>
+        </div>
+        <p className="text-sm text-muted mt-1">
+          Coming soon: add Push100 to your lock screen so your daily goal
+          follows you all day.
+        </p>
+
+        <div className="mt-4 divide-y divide-border">
+          <ReminderRow
+            label="Show today's reps"
+            sub="Big number on the widget"
+            value={data.widget.showTodayReps}
+            onChange={(v) => setWidgetSetting("showTodayReps", v)}
+          />
+          <ReminderRow
+            label="Show goal progress"
+            sub="Progress bar + percentage"
+            value={data.widget.showGoalProgress}
+            onChange={(v) => setWidgetSetting("showGoalProgress", v)}
+          />
+          <ReminderRow
+            label="Show streak"
+            sub="🔥 streak chip in the corner"
+            value={data.widget.showStreak}
+            onChange={(v) => setWidgetSetting("showStreak", v)}
+          />
+          <ReminderRow
+            label="Show reminders"
+            sub="One-line motivational nudge"
+            value={data.widget.showReminders}
+            onChange={(v) => setWidgetSetting("showReminders", v)}
+          />
+        </div>
+
+        <p className="text-[11px] text-muted mt-3">
+          Tweak these and watch the live preview on the dashboard update.
+        </p>
       </section>
 
       <section className="card p-5">
