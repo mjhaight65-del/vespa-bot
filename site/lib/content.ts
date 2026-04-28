@@ -1,15 +1,16 @@
 // All editable copy for the Haight Growth one-page site.
-// Change pricing, headlines, contact info, etc. right here.
 
 export const business = {
   name: "Haight Growth",
   founder: "Marc Haight",
-  tagline: "We help small businesses stop leaking money online.",
-  locations: ["Charleston, SC", "Atlanta, GA — Summer 2026"],
+  tagline: "Plug the leaks. Grow the revenue.",
+  locations: ["Charleston, SC", "Atlanta, GA — coming soon"],
   contact: {
     email: "mjhaight65@icloud.com",
     phone: "(843) 425-8382",
     bookingUrl: "#contact",
+    instagram: "https://instagram.com/haightgrowth",
+    instagramHandle: "@haightgrowth",
   },
 };
 
@@ -26,10 +27,10 @@ export const nav = {
 export const hero = {
   eyebrow: "AI · Automation · Growth Systems",
   headline: "Stop Leaking Money Online",
-  sub: "Websites, AI automation, lead capture, and social media systems built to help restaurants and small businesses turn traffic into customers.",
+  sub: "Modern websites, AI automation, lead capture, and social systems built to turn your traffic into customers.",
   primaryCta: { label: "Get a Free Leak Audit", href: "#contact" },
   secondaryCta: { label: "See What We Fix", href: "#services" },
-  trustLine: "Now serving Charleston · Atlanta this summer",
+  trustLine: "Now serving Charleston · Atlanta coming soon",
 };
 
 export const problem = {
@@ -78,33 +79,25 @@ export const services = {
       body: "24/7 assistants that answer FAQs, qualify leads, and capture contact info while you sleep.",
     },
     {
-      title: "Lead capture forms",
-      body: "Smart forms and pop-ups designed for conversions — wired straight into your CRM or inbox.",
-    },
-    {
-      title: "Social media strategy",
-      body: "Content systems and posting cadences built for restaurants and local brands.",
+      title: "Lead capture & follow-up",
+      body: "Smart forms, pop-ups, and automated email/SMS sequences that recover lost leads.",
     },
     {
       title: "Google Business Profile",
-      body: "Optimized listings, photos, reviews, and posts that win local search.",
+      body: "Optimized listings, photos, reviews, and posts that win local search at the moment of intent.",
     },
     {
-      title: "Automated follow-up",
-      body: "Email and SMS sequences that recover lost leads and bring customers back.",
-    },
-    {
-      title: "Restaurant menus & online ordering",
-      body: "Cleaner menus, faster ordering, and better third-party integrations.",
+      title: "Social media systems",
+      body: "Content cadences and posting systems built for restaurants and local brands.",
     },
   ],
 };
 
 export const caseStudies = {
-  eyebrow: "Early work",
+  eyebrow: "Recent projects",
   title: "Real businesses we're building with right now.",
   intro:
-    "These are early portfolio examples — small projects we're proud of and growing alongside.",
+    "Early-stage portfolio. Small projects we're proud of and growing alongside.",
   cases: [
     {
       name: "Vespa Pizzeria",
@@ -124,7 +117,7 @@ export const caseStudies = {
       name: "Parlay Dynasty",
       role: "Sports entertainment brand",
       summary:
-        "Brand and growth support for a sports entertainment brand — building a clean digital identity, social presence, and content systems to grow the audience.",
+        "Brand and growth support for a sports entertainment apparel brand — clean digital identity, social presence, and content systems to grow the audience.",
       tags: ["Brand", "Social media", "Content systems"],
     },
   ],
@@ -154,7 +147,7 @@ export const packages = {
     },
     {
       name: "Growth Website Build",
-      price: "$699+",
+      price: "$699–$1,499",
       cadence: "one-time",
       description:
         "A modern, mobile-first website built to convert — wired to capture leads from day one.",
@@ -170,7 +163,7 @@ export const packages = {
     },
     {
       name: "Monthly Growth Partner",
-      price: "$1,200+",
+      price: "From $1,200",
       cadence: "per month",
       description:
         "Ongoing partner that runs your website, AI, social, and follow-up systems so you can run the business.",
@@ -190,6 +183,9 @@ export const packages = {
 export const finalCta = {
   eyebrow: "Free Leak Audit",
   title: "Want to know where your business is leaking money?",
-  sub: "Book a free 20-minute audit. We'll show you the top three leaks costing you customers — and what we'd fix first.",
-  primaryCta: { label: "Book a Free Leak Audit", href: "#contact" },
+  sub: "Send a quick note. We'll show you the top three leaks costing you customers — and what we'd fix first.",
+  primaryCta: {
+    label: "Email Marc",
+    href: "mailto:mjhaight65@icloud.com?subject=Free%20Leak%20Audit",
+  },
 };

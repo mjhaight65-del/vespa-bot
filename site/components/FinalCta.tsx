@@ -17,7 +17,7 @@ export function FinalCta() {
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
               <a
-                href={`mailto:${business.contact.email}?subject=Free%20Leak%20Audit`}
+                href={finalCta.primaryCta.href}
                 className="btn-primary inline-flex items-center justify-center rounded-full px-6 py-3 text-sm"
               >
                 {finalCta.primaryCta.label}
