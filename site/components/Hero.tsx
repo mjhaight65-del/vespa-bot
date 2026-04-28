@@ -4,7 +4,6 @@ import { hero } from "@/lib/content";
 export function Hero() {
   return (
     <section id="top" className="relative overflow-hidden">
-      <div className="grid-bg" aria-hidden />
       <div className="glow" aria-hidden />
 
       <Container className="relative z-10 pb-20 pt-20 sm:pt-28 md:pb-28">

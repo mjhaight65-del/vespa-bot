@@ -120,6 +120,13 @@ export const caseStudies = {
         "Full AI-integrated website build with an on-site assistant that answers visitor questions and captures leads after hours.",
       tags: ["Website", "AI chatbot", "Lead capture"],
     },
+    {
+      name: "Parlay Dynasty",
+      role: "Sports entertainment brand",
+      summary:
+        "Brand and growth support for a sports entertainment brand — building a clean digital identity, social presence, and content systems to grow the audience.",
+      tags: ["Brand", "Social media", "Content systems"],
+    },
   ],
 };
 

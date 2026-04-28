@@ -15,17 +15,13 @@ export function CaseStudies() {
           </p>
         </div>
 
-        <div className="mt-12 grid gap-5 md:grid-cols-2">
+        <div className="mt-12 grid gap-5 md:grid-cols-3">
           {caseStudies.cases.map((c) => (
-            <article key={c.name} className="card relative overflow-hidden p-7">
-              <div
-                aria-hidden
-                className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-[color:var(--color-gold)]/10 blur-3xl"
-              />
+            <article key={c.name} className="card p-7">
               <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--color-muted)]">
                 {c.role}
               </p>
-              <h3 className="mt-2 text-2xl font-semibold tracking-tight">
+              <h3 className="mt-2 text-xl font-semibold tracking-tight">
                 {c.name}
               </h3>
               <p className="mt-4 text-sm leading-relaxed text-[color:var(--color-muted)]">

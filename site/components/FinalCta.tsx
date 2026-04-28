@@ -5,17 +5,8 @@ export function FinalCta() {
   return (
     <section id="contact" className="relative py-20 md:py-28">
       <Container>
-        <div className="card relative overflow-hidden p-8 sm:p-12 md:p-16">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[color:var(--color-gold)]/15 blur-3xl"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-[color:var(--color-gold)]/10 blur-3xl"
-          />
-
-          <div className="relative max-w-2xl">
+        <div className="card p-8 sm:p-12 md:p-16">
+          <div className="max-w-2xl">
             <SectionEyebrow>{finalCta.eyebrow}</SectionEyebrow>
             <h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl md:text-5xl">
               {finalCta.title}
