@@ -7,8 +7,8 @@ export const business = {
   tagline: "We help small businesses stop leaking money online.",
   locations: ["Charleston, SC", "Atlanta, GA — Summer 2026"],
   contact: {
-    email: "marc@haightgrowth.com",
-    phone: "(555) 555-5555",
+    email: "mjhaight65@icloud.com",
+    phone: "(843) 425-8382",
     bookingUrl: "#contact",
   },
 };
